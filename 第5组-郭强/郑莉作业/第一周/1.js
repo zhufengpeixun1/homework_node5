@@ -35,7 +35,7 @@ function mkdir(path) {
  * @param path 指定目录
  */
 function rmAll(path) {
-    var topPath = path;
+    var pathList = [];
     var count=0;
     ~function rm(aPath) {
         fs.readdir(aPath,function (err, files) {
@@ -48,9 +48,24 @@ function rmAll(path) {
                 if(stat.isDirectory()){
                     fs.rmdir(p,function (err) {
                         if(err){
+                            pathList.push(p);
                             rm(p);
                         }else{
-                            rm(topPath);
+                            //console.log(pathList);
+                            pathList.reverse().forEach(function (item) {
+                                var arr = [];
+                                fs.rmdir(item,function (err) {
+                                    if(err){
+                                        arr.push(item);
+                                        rm(item);
+                                    }else{
+                                        //console.log(arr);
+                                        arr.reverse().forEach(function (p) {
+                                            fs.rmdirSync(p);
+                                        })
+                                    }
+                                });
+                            })
                         }
                         console.log(++count);
                     });
@@ -60,10 +75,14 @@ function rmAll(path) {
                     });
                 }
             });
-        });
-    }(path);
 
+        });
+
+    }(path);
 }
-//mkdir('a/b/c/d/e');
+/*mkdir('a/b/c/d/e');
+mkdir('a/b/cc/dd/ee');
+mkdir('a/b/c/dd/ee');
+mkdir('a/bb/ccc/ddd/eee');*/
 rmAll('./a');
 
