@@ -28,26 +28,35 @@ mkdirs("a/b/dd/tc",function(err){
 
 // 作业2 遍历删除目录下的文件和目录
 
-
-function delRoot(dir,cb){
-	dir = path.resolve(dir);
+function delRoot(dir){
+	dir = path.resolve(dir); // 获取当前绝对路径
+	var arr = [];// 设置一个数组保存 树干
 	fs.readdir(dir,function(err,files){
-		console.log(files);
-		console.log(files.length);
+		if(err)return;
 		if(files.length > 0){
-			files.forEach(function(file){
+			arr.unshift(dir); // 保存树干
+			files.forEach(function(file){ // 处理 树梢
 				file = path.join(dir,file)
 				fs.stat(file,function(err,st){
+					if(err)return;
 					if(st.isDirectory()){
 						delRoot(file)
 					}else{
-						fs.unlink(file);
+						fs.unlink(file,function(){
+							//console.log('删除成功');
+						});
 					}
 				})
 			})
 		}else{
 			fs.rmdir(dir,function(){
-				console.log(dir,'文件夹被删除了');
+				//console.log(dir,'文件夹被删除了');
+			})
+		}
+		// 处理 树干
+		if(arr.length > 0){
+			arr.forEach(function(item){
+				delRoot(item);
 			})
 		}
 	})
