@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>增删改查</title>
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <style>
+
+        li{
+            list-style: none;
+
+        }
+
+        #change,#look{
+            display: none;
+        }
+        #changejson,#lookJson{
+            padding-top:20px ;
+            display: block;
+            width: 276px;
+            height: 239px;
+            background: #fff;
+            font-family: "微软雅黑";
+            position: absolute;
+            z-index: 9999;
+            left:300px;
+            top: 155px;
+        }
+        #changejson button,#lookJson button{
+            margin-left:10px;
+        }
+             #zhezhao ,.zhezhao{
+            position: absolute;
+            width: 1276px;
+            height: 1239px;
+            background: #666666;
+            filter: alpha(opacity=40);
+            opacity: 0.4;
+            z-index: 9995;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+<div id="div1">
+    <table id="tab" class="table table-bordered">
+        <thead>
+        <tr >
+
+            <td>姓名</td>
+            <td>年龄</td>
+            <td>分数</td>
+            <td>选择</td>
+
+        </tr>
+        </thead >
+        <tbody id="json">
+
+        </tbody>
+
+        <tr><td><button onclick="add()">新增</button></td><td><button  onclick="deleteBtn()">删除</button></td>
+            <td><button onclick="look()">查找</button></td><td><button id="revise">修改</button></td></tr>
+    </table>
+    <div id="change" >
+    <ul id="changejson">
+        <li>姓名：<input type="text" name="name"/></li>
+        <li>年龄：<input type="text" name="age"/></li>
+        <li>性别：<input type="radio" checked name="sex" value="0">男
+            <input type="radio" name="sex" value="1">女</li> </li>
+        <!--<li > <input readonly type="radio" checked name="radioed" value="false">false</li>-->
+        <button  onclick="addJson()">确定</button><button onclick="removeAdd()">取消</button>
+    </ul>
+    <div id="zhezhao" style="height: 2840px; display: block; z-index: 9992;"></div>
+</div>
+    <div id="look" >
+        <ul id="lookJson">
+            <li>姓名：<input type="text" name="name"/></li>
+            <li>年龄：<input type="text" name="age"/></li>
+            <li>性别：<input type="radio" checked name="sex" value="0">男
+                <input type="radio" name="sex" value="1">女</li> </li>
+            <!--<li > <input readonly type="radio" checked name="radioed" value="false">false</li>-->
+            <button  onclick="lookJson()">确定</button><button onclick="removelook()">取消</button>
+        </ul>
+        <div class="zhezhao" style="height: 2840px; display: block; z-index: 9992;"></div>
+    </div>
+</div>
+</body>
+<script>
+    var oTab = document.getElementById("tab");
+    var oChange = document.getElementById("change");
+    var look = document.getElementById('look');
+    var oAdd = document.getElementById("add");
+    var oDelete = document.getElementById("delete");
+    var oLook = document.getElementById("look");
+    var oRevise = document.getElementById("revise");
+    var tHead = oTab.tHead;
+    var oThs = tHead.rows[0].cells;
+    var tBody = oTab.tBodies[0];
+    var oRows = tBody.rows;
+   var data = null;
+    var flag = false;
+    //初始化
+    //ajaxFn('ajaxJson.json');
+    function ajaxFn(url) {
+        var ajax = new XMLHttpRequest();
+        ajax.open('get', url, true);
+
+        ajax.onreadystatechange = function () {
+            if (ajax.readyState == 4 && /^2\d{2}$/.test(ajax.status)) {
+                var val = ajax.responseText;
+               // console.log(val+"0000000");
+               data = utils.jsonParse(val);
+               // console.log(data+"llllllll");
+               // var str = data[0]["id"];
+
+                if(data.id==1){
+                    delete data[0];
+                    bind(data);
+                    console.log(121212121);
+                }else if(data[0]["id"] == 2){
+                    init(data);
+                }else if(data[0]["id"] == 4){
+
+                }else{
+
+                }
+
+
+            }
+        }
+        ajax.send(null);
+    }
+
+    function bind(data) {
+        var frg = document.createDocumentFragment();
+        var oTr = document.createElement("tr");
+        for (var cur in data) {
+            if(cur =='id'){
+               continue;
+            }
+                var oTd = document.createElement("td");
+                oTd.innerHTML = cur === "sex" ? (data[cur] == 0 ? "男" : "女") : data[cur];
+                if(cur === "radioed"){
+                    oTd.innerHTML = '<input type="radio" name="radioed" >';
+                }
+                oTr.appendChild(oTd);
+        }
+        frg.appendChild(oTr);
+        tBody.appendChild(frg);
+        frg = null;
+    }
+    function init(data){
+        while(tBody.hasChildNodes()) //当tBody下还存在子节点时 循环继续
+        {
+            tBody.removeChild(tBody.firstChild);
+        }
+        var frg = document.createDocumentFragment();
+        for (var i = 0; i < data.length; i++) {
+            var cur = data[i];
+
+            var oTr = document.createElement("tr");
+            for (var key in cur) {
+
+                var oTd = document.createElement("td");
+                oTd.innerHTML = key === "sex" ? (cur[key] == 0 ? "男" : "女") : (key === "radioed"? '<input type="radio" name="radioed" >':cur[key]);
+
+
+                oTr.appendChild(oTd);
+            }
+            frg.appendChild(oTr);
+        }
+        tBody.appendChild(frg);
+        frg = null;
+
+    }
+
+    //新增
+    function add(){
+        blockFn(oChange);
+    }
+
+    //新增
+function addJson(obj){
+    var listInput = oChange.getElementsByTagName('input');
+    var str ="";
+   for(var i=0;i<listInput.length;i++){
+    var cur = listInput[i].name
+    var curVal = listInput[i].value;
+
+    if(cur == 'sex'){
+        //alert();
+        if(listInput[i].checked){
+            str += '&'+cur+'='+curVal;
+
+        }
+            continue;
+
+    }
+     str += '&'+cur+'='+curVal;
+}
+   // console.log(str.substr(1));
+   // str = str.substr(1);
+    //id = 1 为新增
+    ajaxFn('http://localhost:8998/ajax?id=1'+str+"&radioed=false");
+    displayFn(oChange);
+
+}
+    //取消新增
+    function removeAdd(){
+        displayFn(oChange);
+    }
+
+//    删除数据
+function deleteBtn(){
+  var  aInput = oTab.getElementsByTagName('input');
+    for(var i=0;i<aInput.length;i++){
+        var cur = aInput[i];
+                if(cur.checked){
+                    flag = true;
+                    //id = 1 为新增
+                    ajaxFn('http://localhost:8998/ajax?id='+2+"&removeid="+i);
+                }
+
+    }
+    if(!flag){
+        alert('请选择你要删除的数据');
+    }
+}
+//查找
+    function look(){
+
+        blockFn(look);
+    }
+//    查找数据
+    function lookJson(){
+        var listInput = look.getElementsByTagName('input');
+        var str ="";
+        for(var i=0;i<listInput.length;i++){
+            var cur = listInput[i].name
+            var curVal = listInput[i].value;
+
+            if(cur == 'sex'){
+                //alert();
+                if(listInput[i].checked){
+                    str += '&'+cur+'='+curVal;
+                }
+                continue;
+
+            }
+            str += '&'+cur+'='+curVal;
+        }
+
+        //id = 3 为查找
+        ajaxFn('http://localhost:8998/ajax?id=3'+str+"&radioed=false");
+        displayFn(look);
+    }
+    //取消新增
+    function removelook(){
+        displayFn(look);
+    }
+
+    function displayFn(obj){
+        obj.style.display='none';
+    }
+    function blockFn(obj){
+        obj.style.display='block';
+    }
+    var utils = {
+        listToArray: function (likeAry) {
+            var ary = [];
+            try {
+                ary = Array.prototype.slice.call(likeAry);
+            } catch (e) {
+                for (var i = 0; i < likeAry.length; i++) {
+                    ary[ary.length] = likeAry[i];
+                }
+            }
+            return ary;
+        },
+        jsonParse: function (str) {
+            return "JSON" in window ? JSON.parse(str) : eval("(" + str + ")");
+        }
+    };
+</script>
+</html>
